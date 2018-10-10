@@ -1,0 +1,6 @@
+needs flex and bison
+
+To build run make
+To build again first run make clean
+
+to run: ./interp filename.py
