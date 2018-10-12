@@ -19,7 +19,15 @@ void buildParseTree(vector<ProgramTree*> pList,int vectPos,ProgramTree* currentP
 		currentParent->addChild(pList[vectPos]);
 	}
 	else if(currentParent->getType()==ifStatments){
-		if(currentParent->getIndent()<=pList[vectPos]->getIndent()){
+		if(currentParent->getIndent()>=pList[vectPos]->getIndent()){
+			while(currentParent->getIndent()>=pList[vectPos]->getIndent() && currentParent->getType()!=program){
+				currentParent=currentParent->getParent();
+			}
+		}
+		currentParent->addChild(pList[vectPos]);
+	}
+	else if(currentParent->getType()==functionStatments){
+		if(currentParent->getIndent()>=pList[vectPos]->getIndent()){
 			while(currentParent->getIndent()>=pList[vectPos]->getIndent() && currentParent->getType()!=program){
 				currentParent=currentParent->getParent();
 			}
@@ -33,7 +41,13 @@ void buildParseTree(vector<ProgramTree*> pList,int vectPos,ProgramTree* currentP
 		currentParent=theIfStatments;
 
 	}
+	if(pList[vectPos]->getType()==functionDecleration){
+		ProgramTree* theFunctionStatments=new ProgramTree(pList[vectPos]->getIndent(),functionStatments);
+		pList[vectPos]->addChild(theFunctionStatments);
 
+		currentParent=theFunctionStatments;
+
+	}
 
 
 
@@ -57,7 +71,8 @@ int main(int argc, char *argv[]){
 	buildParseTree(theList,0,theProgram);
 	//theProgram->print();
 	vector<Variable> vars;
-	EvalMachine theMachine=EvalMachine(vars);
+	vector<Function> funcs;
+	EvalMachine theMachine=EvalMachine(vars,funcs);
 
 	theMachine.evaluate(theProgram);
 	yylex_destroy();

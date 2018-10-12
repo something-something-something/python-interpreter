@@ -31,16 +31,45 @@ bool checker(char c,char min,char max){
 		return false;
 	}
 }
+Function::Function(string n,ProgramTree* loc,ProgramTree* s){
+	name=n;
+	location=loc;
+	scope=s;
+}
+string Function::getName(){
+	return name;
+}
+ProgramTree* Function::getScope(){
+	return scope;
+}
+ProgramTree* Function::getLocation(){
+	return location;
+}
+void Function::setLocation(ProgramTree* loc){
+	location=loc;
+}
 
-EvalMachine::EvalMachine(vector<Variable> v){
+
+
+EvalMachine::EvalMachine(vector<Variable> v,vector<Function> f){
 	//tree=ptree;
 	variables=v;
+	functions=f;
 }
 int EvalMachine::evaluate(ProgramTree *current){
 	switch(current->getType()){
 		case varAssignSt: {
 			int value=evaluate(current->getChild(0));
 			assignVariable(current->getStringValue(),value,current->getScope());
+		break;
+		}
+		case returnStatment: {
+			return evaluate(current->getChild(0));
+		break;
+		}
+		case functionDecleration: {
+			ProgramTree* location=current;
+			assignFunction(current->getStringValue(),location,current->getScope());
 		break;
 		}
 		case ifElSt: {
@@ -102,6 +131,7 @@ int EvalMachine::evaluate(ProgramTree *current){
 			string currStr="";
 			bool onIdentifier=false;
 			bool onInt=false;
+			bool onFunc=false;
 			for(int i=0;i<mathStr.length();i++){
 				
 				if(!onIdentifier&&!onInt){
@@ -114,19 +144,37 @@ int EvalMachine::evaluate(ProgramTree *current){
 				}
 				if(onIdentifier||onInt){
 					if(mathStr[i]=='-'||mathStr[i]=='+'||mathStr[i]=='/'||mathStr[i]=='*'){
-						if(onIdentifier){
-							mathVec.push_back({currStr,0,' '});
+						if(onIdentifier&&!onFunc){
+							mathVec.push_back({currStr,0,' ',false});
 							currStr="";
 							onIdentifier=false;
 							onInt=false;
+							onFunc=false;
+						}
+						else if(onIdentifier&&onFunc){
+							
+							mathVec.push_back({currStr,0,' ',true});
+							currStr="";
+							onIdentifier=false;
+							onInt=false;
+							onFunc=false;
 						}
 						else if(onInt){
-							mathVec.push_back({"",atoi(currStr.c_str()),' '});
+							mathVec.push_back({"",atoi(currStr.c_str()),' ',false});
 							currStr="";
 							onIdentifier=false;
 							onInt=false;
+							onFunc=false;
 						}
 						mathVec.push_back({"",0,mathStr[i]});
+					}
+					else if(mathStr[i]=='('&&onIdentifier&&!onFunc){
+						onFunc=true;
+							
+					}
+					else if(mathStr[i]==')'&&onIdentifier&&onFunc){
+						//
+						
 					}
 					else{
 						currStr+=mathStr[i];
@@ -134,18 +182,27 @@ int EvalMachine::evaluate(ProgramTree *current){
 				}
 				
 			}
-			
-			if(onIdentifier){
-				mathVec.push_back({currStr,0,' '});
+			if(onIdentifier&&!onFunc){
+				mathVec.push_back({currStr,0,' ',false});
 				currStr="";
 				onIdentifier=false;
 				onInt=false;
+				onFunc=false;
+			}
+			else if(onIdentifier&&onFunc){
+				
+				mathVec.push_back({currStr,0,' ',true});
+				currStr="";
+				onIdentifier=false;
+				onInt=false;
+				onFunc=false;
 			}
 			else if(onInt){
 				mathVec.push_back({"",atoi(currStr.c_str()),' '});
 				currStr="";
 				onIdentifier=false;
 				onInt=false;
+				onFunc=false;
 			}
 			
 
@@ -205,9 +262,21 @@ int EvalMachine::evaluate(ProgramTree *current){
 		break;
 		}
 		case program:{ 
-		for(int i=0;i<current->getChildren().size();i++){
+			for(int i=0;i<current->getChildren().size();i++){
 				evaluate(current->getChild(i));
+			}
+		break;
 		}
+		case functionStatments:{ 
+			for(int i=0;i<current->getChildren().size();i++){
+				if(current->getChild(i)->getType()==returnStatment){
+					
+					return evaluate(current->getChild(i));
+				}
+				else{
+					evaluate(current->getChild(i));
+				}
+			}
 		break;
 		}
 		
@@ -224,8 +293,15 @@ int EvalMachine::evaluateMathComponent(MathComponent m,ProgramTree* scope){
 	
 	if(m.name!=""){
 		//is variable
+		if(m.isFunc){
+			
+			return evaluate(getFunctionLocation(m.name,scope)->getChild(0));
+		}
+		else{
+			
+			return getVariableValue(m.name,scope);
+		}
 		
-		return getVariableValue(m.name,scope);
 	}
 	else {
 		//
@@ -247,6 +323,18 @@ void EvalMachine::assignVariable(string name,int value,ProgramTree* scope){
 		variables.push_back(Variable(name,value,scope));
 	}
 }
+void EvalMachine::assignFunction(string name,ProgramTree* loc,ProgramTree* scope){
+	bool found=false;
+	for(int i=0;i<functions.size();i++){
+		if(functions[i].getName()==name&&functions[i].getScope()==scope){
+			functions[i].setLocation(loc);
+			found=true;
+		}
+	}
+	if(!found){
+		functions.push_back(Function(name,loc,scope));
+	}
+}
 int EvalMachine::getVariableValue(string name,ProgramTree* scope){
 	bool found=false;
 	for(int i=0;i<variables.size();i++){
@@ -255,9 +343,15 @@ int EvalMachine::getVariableValue(string name,ProgramTree* scope){
 			
 		}
 	}
-	if(!found){
-		return 0;
-	}
+	return 0;
 }
-
+ProgramTree* EvalMachine::getFunctionLocation(string name,ProgramTree* scope){
+	bool found=false;
+	for(int i=0;i<functions.size();i++){
+		if(functions[i].getName()==name&&functions[i].getScope()==scope){
+			return functions[i].getLocation();
+		}
+	}
+	return 0;
+}
 

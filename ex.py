@@ -1,14 +1,30 @@
 print("test")
 
+varfuncvar=7000
+def myfun():
+    print("My Function")
+    varfuncvar=7777
+    print("varfuncvar")
+    print(varfuncvar)
+    if 2==2:
+        print("FUNCTION 2 equals 2")
+    return 2+444
+
+varassign=4+3
+
+
 i=4
 print(i)
 
 i=8*90+8-2
 print(i)
-
-
+print("varfuncvar")
+print(varfuncvar)
+print("function call")
+print(myfun()+2)
+print("varfuncvar")
+print(varfuncvar)
 print("if ")
-
 
 j=344     
 print(j)
@@ -31,6 +47,8 @@ i=y
 if i==y:
     print("i is equal to y")
     print(i)
+    if 1<0:
+        print("1 bigger than 0")
 
 
 f=9

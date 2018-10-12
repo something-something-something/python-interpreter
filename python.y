@@ -7,7 +7,6 @@ using namespace std;
 #include <stdio.h>
 #include <string.h>
 #include <vector>
-#include "MyClass.hpp"
 #include "ProgramTree.hpp"
 extern int yylex();
 extern int yyparse();
@@ -43,6 +42,8 @@ int currentIndent=0;
 %token <s> IDENT
 //if identifier
 %token <s> IFID
+%token <s> FUNCDEF
+%token <s> RETURNS
 %token <s> BOOLSYMBOL
 %token <s> ENDL
 %token <intv> INDENT
@@ -68,7 +69,17 @@ linestatment:
 	printstatment |
 	varassign  |
 	 ifstatment
+	 | functiondef |
+	 returnSt
 	;
+
+
+functiondef:
+	FUNCDEF IDENT '(' ')' ':'{
+		ProgramTree* func=new ProgramTree(currentIndent,functionDecleration);
+		func->setStringValue($2);
+		statmentList.push_back(func);
+	}
 
 //will be more complicted
 mathstatment:
@@ -81,7 +92,16 @@ math:
 	INT  {string i=to_string($1);
 		$$=strdup(i.c_str());
 		}
-	| IDENT {$$=$1;}
+	| 
+	IDENT {$$=$1;}
+
+	|
+	IDENT '(' ')' {
+		string funcall=$1;
+		funcall=funcall+"()";
+		$$=strdup(funcall.c_str());
+	}
+
 	|INT MATHSYMBOL math {
 		string mathSt=to_string($1);
 		mathSt+=$2;
@@ -92,6 +112,14 @@ math:
 		string mathSt=$1;
 		mathSt+=$2;
 		mathSt+=$3;
+		$$=strdup(mathSt.c_str());}
+	|
+	IDENT '(' ')' MATHSYMBOL math {
+		string funcall=$1;
+		funcall=funcall+"()";
+		string mathSt=strdup(funcall.c_str());
+		mathSt+=$4;
+		mathSt+=$5;
 		$$=strdup(mathSt.c_str());}
 
 printstatment:
@@ -104,12 +132,20 @@ printstatment:
 		print->addChild(printStr);
 		statmentList.push_back(print);
 	} |
-	PRINT IDENT ')'{
+	PRINT math ')'{
 		ProgramTree* print=new ProgramTree(currentIndent,printSt);
-		ProgramTree* printVar=new ProgramTree(currentIndent,variable);
-		printVar->setStringValue($2);
-		print->addChild(printVar);
+		ProgramTree* printMathy=new ProgramTree(currentIndent,mathSt);
+		printMathy->setStringValue($2);
+		print->addChild(printMathy);
 		statmentList.push_back(print);
+	}
+returnSt:
+	RETURNS math{
+		ProgramTree* returnStuff=new ProgramTree(currentIndent,returnStatment);
+		ProgramTree* mathy=new ProgramTree(currentIndent,mathSt);
+		mathy->setStringValue($2);
+		returnStuff->addChild(mathy);
+		statmentList.push_back(returnStuff);
 	}
 varassign:
 	IDENT '=' math  { 
@@ -201,7 +237,7 @@ void lnumber(){
 	cout<<"LINES: "<<linenumber<<endl;
 }
 void yyerror(const char *s) {
-	cout << "error " << s << endl;
+	cout << "error linenumber"<<linenumber<<" " << s << endl;
 }
 vector<ProgramTree*> getStatmentList(){
 	return statmentList;

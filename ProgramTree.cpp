@@ -74,6 +74,12 @@ void ProgramTree::print(){
 		break;
 		case program: theType="program";
 		break;
+		case functionDecleration: theType="functionDecleration";
+		break;
+		case functionStatments: theType="functionStatments";
+		break;
+		case returnStatment: theType="returnStatment";
+		break;
 	}
 
 	cout<<"Type"<<": "<<theType;
@@ -108,6 +114,9 @@ ProgramTree* ProgramTree::getScope(){
 	return scope;*/
 	if(parent==NULL||this->getType()==program){
 		return this;
+	}
+	else if(parent->getType()==functionDecleration){
+		return parent;
 	}
 	else{
 		return parent->getScope();
