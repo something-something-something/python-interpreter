@@ -27,6 +27,14 @@ if[ ]+ {
 	yylval.s=strdup(yytext);
 	vecOfStrings.push_back(yylval.s);
 	 return IFID;}
+def[ ]+ { 
+	yylval.s=strdup(yytext);
+	vecOfStrings.push_back(yylval.s);
+	 return FUNCDEF;}
+return[ ]+ { 
+	yylval.s=strdup(yytext);
+	vecOfStrings.push_back(yylval.s);
+	 return RETURNS;}
 print\( {return PRINT;}
 [\+\-\/\*] { 
 	yylval.s=strdup(yytext);

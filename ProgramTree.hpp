@@ -16,7 +16,10 @@ enum ParseTreeType{
 	elseStatments,//not supported currently
 	printSt,
 	str,
-	program
+	program,
+	functionDecleration,
+	functionStatments,
+	returnStatment
 	};
 class ProgramTree{
 	public:
