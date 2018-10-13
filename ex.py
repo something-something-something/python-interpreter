@@ -12,6 +12,11 @@ def myfun():
 
 varassign=4+3
 
+def otherfun():
+    print("OTHERFUN")
+    print("hello")
+    print("hi")
+    return 0
 
 i=4
 print(i)
@@ -25,7 +30,7 @@ print(myfun()+2)
 print("varfuncvar")
 print(varfuncvar)
 print("if ")
-
+otherfun()
 j=344     
 print(j)
 y=3
@@ -50,7 +55,7 @@ if i==y:
     if 1<0:
         print("1 bigger than 0")
 
-
+8+9+32732939329+otherfun()
 f=9
 f=sixsixsix
 print(f)
