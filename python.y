@@ -84,9 +84,9 @@ functiondef:
 //will be more complicted
 mathstatment:
 	math {
-		//ProgramTree* mathy=new ProgramTree(currentIndent,mathSt);
-		//mathy->setStringValue($1);
-		//statmentList.push_back(mathy);
+		ProgramTree* mathy=new ProgramTree(currentIndent,mathSt);
+		mathy->setStringValue($1);
+		statmentList.push_back(mathy);
 		}
 math:
 	INT  {string i=to_string($1);
