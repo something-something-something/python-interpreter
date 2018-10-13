@@ -2,6 +2,8 @@ using namespace std;
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <stack>
+#include <queue>
 #include "EvalMachine.hpp"
 #include <iostream>
 
@@ -23,6 +25,15 @@ string Variable::getName(){
 ProgramTree* Variable::getScope(){
 	return scope;
 }
+int getPriority(MathComponent m){
+	if(m.symbol=='+'||m.symbol=='-'){
+		return 1;
+	}
+	else{
+		return 2;
+	}
+}
+
 bool checker(char c,char min,char max){
 	if( (c >= min) && (c<=max) ){
 		return true;
@@ -123,9 +134,7 @@ int EvalMachine::evaluate(ProgramTree *current){
 		}
 		case mathSt:{
 			
-
-			//TODO use postfix
-			//NOT ACCURATE FOR ORDER OF OPERATIONS
+			//cout<< current->getStringValue()<<endl;
 			vector<MathComponent> mathVec;
 			string mathStr=current->getStringValue();
 			string currStr="";
@@ -198,15 +207,96 @@ int EvalMachine::evaluate(ProgramTree *current){
 				onFunc=false;
 			}
 			else if(onInt){
-				mathVec.push_back({"",atoi(currStr.c_str()),' '});
+				mathVec.push_back({"",atoi(currStr.c_str()),' ',false});
 				currStr="";
 				onIdentifier=false;
 				onInt=false;
 				onFunc=false;
 			}
-			
+			//cout<<"postfix start"<<endl;
+
+			stack <MathComponent> operators;
+			queue <MathComponent> output;
+			for(int i=0;i<mathVec.size();i++){
+				if(mathVec[i].symbol==' '){
+					output.push(mathVec[i]);
+				}
+				else{
+					while(operators.size()>0&&
+					getPriority(operators.top())>=
+					getPriority(mathVec[i])
+					){
+						output.push(operators.top());
+						operators.pop();
+					}
+					operators.push(mathVec[i]);
+				}
+			}
+			while(operators.size()>0){
+				output.push(operators.top());
+				operators.pop();
+			}
+			//cout<<"postfix output stack done Stack is size"<<output.size()<<endl;
+		
+			MathComponent a;
+			MathComponent b;
+			stack<MathComponent> answer;
+			while(output.size()>0){
+				//cout<<output.front().symbol<<endl;
+				if(output.front().symbol==' '){
+					//cout<<"pushing nonoperator to answer"<<endl;
+					answer.push(output.front());
+					output.pop();
+				}
+				else{
+					//cout<<"IS operator"<<endl;
+					char sy=output.front().symbol;
+					//cout<<"getting b from answer"<<endl;
+					b=answer.top();
+					answer.pop();
+					//cout<<"getting a from answer"<<endl;
+					a=answer.top();
+					answer.pop();
+					if(sy=='+'){
+						answer.push({"",
+						evaluateMathComponent(a,current->getScope())
+						+
+						evaluateMathComponent(b,current->getScope())
+						,' ',false});
+					}
+					else if(sy=='-'){
+						answer.push({"",
+						evaluateMathComponent(a,current->getScope())
+						-
+						evaluateMathComponent(b,current->getScope())
+						,' ',false});
+					}
+					else if(sy=='*'){
+						answer.push({"",
+						evaluateMathComponent(a,current->getScope())
+						*
+						evaluateMathComponent(b,current->getScope())
+						,' ',false});
+					}
+					else if(sy=='/'){
+						answer.push({"",
+						evaluateMathComponent(a,current->getScope())
+						/
+						evaluateMathComponent(b,current->getScope())
+						,' ',false});	
+					}
+					output.pop();
+				}
+			}
+			//cout<<"postfix end"<<endl;
+			return evaluateMathComponent(answer.top(),current->getScope());
+
+
+
 
 			//do calculations
+			
+			/*
 			int val=evaluateMathComponent(mathVec[0],current->getScope());
 
 			
@@ -228,6 +318,8 @@ int EvalMachine::evaluate(ProgramTree *current){
 				}
 			}
 			return val;
+			*/
+
 
 
 
