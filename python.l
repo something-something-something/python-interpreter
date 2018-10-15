@@ -11,6 +11,11 @@ using namespace std;
 vector<char*> vecOfStrings;
 %}
 %%
+#[^\n]* {
+	yylval.s=strdup(yytext);
+	vecOfStrings.push_back(yylval.s);
+	
+	return COMMENT;}
 \n {
 	
 	yylval.s=strdup(yytext);
@@ -19,9 +24,10 @@ vector<char*> vecOfStrings;
  return ENDL;}
 [0-9]* {yylval.intv=atoi(yytext); return INT;}
 
-\"[a-z A-Z0-9]*\" { 
+\"([[:print:]]{-}[\"\n])*\" { 
 	yylval.s=strdup(yytext);
 	vecOfStrings.push_back(yylval.s);
+	
 	 return STRING;} /*obviously would use a diffrent regexp for string*/
 if[ ]+ { 
 	yylval.s=strdup(yytext);
@@ -35,12 +41,12 @@ return[ ]+ {
 	yylval.s=strdup(yytext);
 	vecOfStrings.push_back(yylval.s);
 	 return RETURNS;}
-print\( {return PRINT;}
+print([ ]*)\( {return PRINT;}
 [\+\-\/\*] { 
 	yylval.s=strdup(yytext);
 	vecOfStrings.push_back(yylval.s); 
 	return MATHSYMBOL;}
-[a-zA-Z]* { 
+[a-zA-Z0-9]* { 
 	yylval.s=strdup(yytext);
 	vecOfStrings.push_back(yylval.s);
 	 return IDENT;}/*obviously would use a diffrent regexp for string*/
@@ -51,6 +57,7 @@ return BOOLSYMBOL;}
 : {return ':';}
 "(" {return '(';}
 ")" {return ')';}
+"," {return ',';}
 ^[ ]+ {yylval.intv=strlen(yytext);return INDENT;}
 . ;
 %%
