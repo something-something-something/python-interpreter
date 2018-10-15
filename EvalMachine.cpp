@@ -435,6 +435,8 @@ int EvalMachine::getVariableValue(string name,ProgramTree* scope){
 			
 		}
 	}
+	string exceptionreason="variable "+name+" not initialized";
+	throw exceptionreason;
 	return 0;
 }
 ProgramTree* EvalMachine::getFunctionLocation(string name,ProgramTree* scope){

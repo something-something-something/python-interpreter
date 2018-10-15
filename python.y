@@ -14,7 +14,11 @@ void yyerror(const char* s);
 int linenumber=1;
 vector<ProgramTree*> statmentList;
 int currentIndent=0;
-
+void createIfStatment(string firstVarname,
+		int firstInt,
+		string compare,
+		string secondVarname,
+		int secondInt);
 
 %}
 
@@ -45,6 +49,7 @@ int currentIndent=0;
 %token <s> FUNCDEF
 %token <s> RETURNS
 %token <s> BOOLSYMBOL
+%token <s> COMMENT
 %token <s> ENDL
 %token <intv> INDENT
 %token <intv> PRINT
@@ -70,10 +75,12 @@ linestatment:
 	varassign  |
 	 ifstatment
 	 | functiondef |
-	 returnSt
+	 returnSt|
+	 commentstatment
 	;
 
-
+commentstatment:
+	COMMENT ;
 functiondef:
 	FUNCDEF IDENT '(' ')' ':'{
 		ProgramTree* func=new ProgramTree(currentIndent,functionDecleration);
@@ -138,7 +145,70 @@ printstatment:
 		printMathy->setStringValue($2);
 		print->addChild(printMathy);
 		statmentList.push_back(print);
+	}|
+	PRINT math ',' STRING ')'{
+		ProgramTree* print=new ProgramTree(currentIndent,printSt);
+
+		ProgramTree* printMathy=new ProgramTree(currentIndent,mathSt);
+		printMathy->setStringValue($2);
+		print->addChild(printMathy);
+
+		ProgramTree* printStr=new ProgramTree(currentIndent,str);
+		string rmquotes=$4;
+		rmquotes=rmquotes.substr(1,rmquotes.size()-2);
+		printStr->setStringValue(rmquotes);
+		print->addChild(printStr);
+
+		statmentList.push_back(print);
+	}|
+	PRINT math ',' math ')'{
+		ProgramTree* print=new ProgramTree(currentIndent,printSt);
+		
+		ProgramTree* printMathy=new ProgramTree(currentIndent,mathSt);
+		printMathy->setStringValue($2);
+		print->addChild(printMathy);
+		
+		ProgramTree* printMathy2=new ProgramTree(currentIndent,mathSt);
+		printMathy2->setStringValue($4);
+		print->addChild(printMathy2);
+
+		statmentList.push_back(print);
+	}|
+	PRINT STRING ',' STRING ')'{
+		ProgramTree* print=new ProgramTree(currentIndent,printSt);
+		
+		ProgramTree* printStr=new ProgramTree(currentIndent,str);
+		string rmquotes=$2;
+		rmquotes=rmquotes.substr(1,rmquotes.size()-2);
+		printStr->setStringValue(rmquotes);
+		print->addChild(printStr);
+		
+		ProgramTree* printStr2=new ProgramTree(currentIndent,str);
+		rmquotes=$4;
+		rmquotes=rmquotes.substr(1,rmquotes.size()-2);
+		printStr2->setStringValue(rmquotes);
+		print->addChild(printStr2);
+		
+		statmentList.push_back(print);
+	}|
+	PRINT STRING ',' math ')'{
+		ProgramTree* print=new ProgramTree(currentIndent,printSt);
+
+		ProgramTree* printStr=new ProgramTree(currentIndent,str);
+		string rmquotes=$2;
+		rmquotes=rmquotes.substr(1,rmquotes.size()-2);
+		printStr->setStringValue(rmquotes);
+		print->addChild(printStr);
+
+		ProgramTree* printMathy=new ProgramTree(currentIndent,mathSt);
+		printMathy->setStringValue($4);
+		print->addChild(printMathy);
+		
+		statmentList.push_back(print);
 	}
+
+
+
 returnSt:
 	RETURNS math{
 		ProgramTree* returnStuff=new ProgramTree(currentIndent,returnStatment);
@@ -158,34 +228,30 @@ varassign:
 	} 
 ifstatment:
 	IFID boolexpr ':'   { 
-		ProgramTree* ifst=new ProgramTree(currentIndent,ifElSt);
-		ProgramTree* boo=new ProgramTree(currentIndent,ifBool);
-		ProgramTree* A;
-		ProgramTree* B;
-		boo->setStringValue(*$2.compare);
-		if(*$2.firstVarname==""){
-			A=new ProgramTree(currentIndent,intConst);
-			A->setIntValue($2.firstInt);
-		}
-		else{
-			A=new ProgramTree(currentIndent,variable);
-			A->setStringValue(*$2.firstVarname);
-		}
-
-		if(*$2.secondVarname==""){
-			B=new ProgramTree(currentIndent,intConst);
-			B->setIntValue($2.secondInt);
-		}
-		else{
-			B=new ProgramTree(currentIndent,variable);
-			B->setStringValue(*$2.secondVarname);
-		}
-
-		boo->addChild(A);
-		boo->addChild(B);
-		ifst->addChild(boo);
-		statmentList.push_back(ifst);
+		string firstVarname=*$2.firstVarname;
+		int firstInt=$2.firstInt;
+		string compare=*$2.compare;
+		string secondVarname =*$2.secondVarname;
+		int secondInt=$2.secondInt;
+		createIfStatment( firstVarname,
+		firstInt,
+		compare,
+		secondVarname,
+		secondInt);
+	} |
+	IFID '(' boolexpr ')' ':'   { 
+		string firstVarname=*$3.firstVarname;
+		int firstInt=$3.firstInt;
+		string compare=*$3.compare;
+		string secondVarname =*$3.secondVarname;
+		int secondInt=$3.secondInt;
+		createIfStatment( firstVarname,
+		firstInt,
+		compare,
+		secondVarname,
+		secondInt);
 	} 
+
 //will need to deal with int and variable comparison
 boolexpr:
 	INT BOOLSYMBOL INT {
@@ -233,6 +299,36 @@ boolexpr:
 		
 %%
 
+void createIfStatment(string firstVarname,int firstInt,string compare,	string secondVarname,int secondInt){
+	ProgramTree* ifst=new ProgramTree(currentIndent,ifElSt);
+	ProgramTree* boo=new ProgramTree(currentIndent,ifBool);
+	ProgramTree* A;
+	ProgramTree* B;
+	boo->setStringValue(compare);
+	if(firstVarname==""){
+		A=new ProgramTree(currentIndent,intConst);
+		A->setIntValue(firstInt);
+	}
+	else{
+		A=new ProgramTree(currentIndent,variable);
+		A->setStringValue(firstVarname);
+	}
+
+	if(secondVarname==""){
+		B=new ProgramTree(currentIndent,intConst);
+		B->setIntValue(secondInt);
+	}
+	else{
+		B=new ProgramTree(currentIndent,variable);
+		B->setStringValue(secondVarname);
+	}
+
+	boo->addChild(A);
+	boo->addChild(B);
+	ifst->addChild(boo);
+	statmentList.push_back(ifst);
+
+}
 void lnumber(){
 	cout<<"LINES: "<<linenumber<<endl;
 }

@@ -73,8 +73,12 @@ int main(int argc, char *argv[]){
 	vector<Variable> vars;
 	vector<Function> funcs;
 	EvalMachine theMachine=EvalMachine(vars,funcs);
-
-	theMachine.evaluate(theProgram);
+	try{
+		theMachine.evaluate(theProgram);
+	}
+	catch(string e){
+		cout<<e<<endl;
+	}
 	yylex_destroy();
 	delete theProgram;
 	delstringsflex();
