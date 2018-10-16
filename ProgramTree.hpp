@@ -13,7 +13,7 @@ enum ParseTreeType{
 	intConst,
 	mathSt,
 	ifStatments,
-	elseStatments,//not supported currently
+	elseStatments,
 	printSt,
 	str,
 	program,
