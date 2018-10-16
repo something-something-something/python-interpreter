@@ -28,7 +28,12 @@ vector<char*> vecOfStrings;
 	yylval.s=strdup(yytext);
 	vecOfStrings.push_back(yylval.s);
 	
-	 return STRING;} /*obviously would use a diffrent regexp for string*/
+	 return STRING;} 
+\'([[:print:]]{-}[\'\n])*\' { 
+	yylval.s=strdup(yytext);
+	vecOfStrings.push_back(yylval.s);
+	
+	 return STRING;} 
 if[ ]+ { 
 	yylval.s=strdup(yytext);
 	vecOfStrings.push_back(yylval.s);
@@ -42,6 +47,9 @@ return[ ]+ {
 	vecOfStrings.push_back(yylval.s);
 	 return RETURNS;}
 print([ ]*)\( {return PRINT;}
+else: {
+	return ELSE;
+}
 [\+\-\/\*] { 
 	yylval.s=strdup(yytext);
 	vecOfStrings.push_back(yylval.s); 
@@ -50,7 +58,7 @@ print([ ]*)\( {return PRINT;}
 	yylval.s=strdup(yytext);
 	vecOfStrings.push_back(yylval.s);
 	 return IDENT;}/*obviously would use a diffrent regexp for string*/
-==|>|<|>=|<= { yylval.s=strdup(yytext); 
+==|>|<|>=|<=|!= { yylval.s=strdup(yytext); 
 vecOfStrings.push_back(yylval.s); 
 return BOOLSYMBOL;}
 = {return '=';}

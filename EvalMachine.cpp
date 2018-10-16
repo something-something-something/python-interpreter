@@ -100,6 +100,19 @@ int EvalMachine::evaluate(ProgramTree *current){
 				}
 				evaluate(ifSt);
 			}
+			else{
+				ProgramTree* elSt;
+				bool elseExists=false;
+				for(int i=0;i<current->getChildren().size();i++){
+					if(current->getChild(i)->getType()==elseStatments){
+						elSt=current->getChild(i);
+						elseExists=true;
+					}
+				}
+				if(elseExists){
+					evaluate(elSt);
+				}
+			}
 		break;
 		}
 		case ifBool: {
@@ -109,6 +122,9 @@ int EvalMachine::evaluate(ProgramTree *current){
 
 			if(current->getStringValue()=="=="){
 				return a==b;
+			}
+			else if(current->getStringValue()=="!="){
+				return a!=b;
 			}
 			else if(current->getStringValue()=="<="){
 				return a<=b;
@@ -334,7 +350,9 @@ int EvalMachine::evaluate(ProgramTree *current){
 		break;
 		}
 		case elseStatments:{
-		//not currently implimented
+			for(int i=0;i<current->getChildren().size();i++){
+				evaluate(current->getChild(i));
+			}
 		break;
 		}
 		case printSt: {

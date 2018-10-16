@@ -14,6 +14,7 @@ void yyerror(const char* s);
 int linenumber=1;
 vector<ProgramTree*> statmentList;
 int currentIndent=0;
+vector<char*> vecOfBisonStrings;
 void createIfStatment(string firstVarname,
 		int firstInt,
 		string compare,
@@ -53,6 +54,7 @@ void createIfStatment(string firstVarname,
 %token <s> ENDL
 %token <intv> INDENT
 %token <intv> PRINT
+%token <intv> ELSE
 %type <s> math
 %type <b> boolexpr
 %%
@@ -76,7 +78,7 @@ linestatment:
 	 ifstatment
 	 | functiondef |
 	 returnSt|
-	 commentstatment
+	 commentstatment| else
 	;
 
 commentstatment:
@@ -98,6 +100,7 @@ mathstatment:
 math:
 	INT  {string i=to_string($1);
 		$$=strdup(i.c_str());
+		vecOfBisonStrings.push_back($$);
 		}
 	| 
 	IDENT {$$=$1;}
@@ -107,27 +110,37 @@ math:
 		string funcall=$1;
 		funcall=funcall+"()";
 		$$=strdup(funcall.c_str());
+		vecOfBisonStrings.push_back($$);
 	}
 
 	|INT MATHSYMBOL math {
 		string mathSt=to_string($1);
 		mathSt+=$2;
 		mathSt+=$3;
-		$$=strdup(mathSt.c_str());}
+		$$=strdup(mathSt.c_str());
+		vecOfBisonStrings.push_back($$);
+		}
+		
 	|
 	IDENT MATHSYMBOL math {
 		string mathSt=$1;
 		mathSt+=$2;
 		mathSt+=$3;
-		$$=strdup(mathSt.c_str());}
+		$$=strdup(mathSt.c_str());
+		vecOfBisonStrings.push_back($$);
+		}
 	|
 	IDENT '(' ')' MATHSYMBOL math {
 		string funcall=$1;
 		funcall=funcall+"()";
-		string mathSt=strdup(funcall.c_str());
+		char* funCallCString=strdup(funcall.c_str());
+		vecOfBisonStrings.push_back(funCallCString);
+		string mathSt=funCallCString;
 		mathSt+=$4;
 		mathSt+=$5;
-		$$=strdup(mathSt.c_str());}
+		$$=strdup(mathSt.c_str());
+		vecOfBisonStrings.push_back($$);
+		}
 
 printstatment:
 	PRINT STRING ')'{
@@ -296,6 +309,11 @@ boolexpr:
 		$$.secondInt=0;
 		$$.secondVarname=&identB;
 		}
+else:
+	ELSE {
+		ProgramTree* elseStatment=new ProgramTree(currentIndent,elseStatments);
+		statmentList.push_back(elseStatment);
+ }
 		
 %%
 
@@ -337,4 +355,9 @@ void yyerror(const char *s) {
 }
 vector<ProgramTree*> getStatmentList(){
 	return statmentList;
+}
+void delstringsbison(){
+	for(int i=0;i<vecOfBisonStrings.size();i++){
+		free(vecOfBisonStrings[i]);
+	}
 }
