@@ -1,4 +1,6 @@
 interp
+mypython
 lex.yy.c
 python.tab.c
 python.tab.h
+sync.sh
