@@ -46,3 +46,50 @@ if 2!=333:
 else:
     print("!2!=333")
 print("hi")  
+
+
+
+print("variable name")
+
+print("x=3")
+x=3
+print("if x>4")
+if x > 4:
+    print("wrong")
+else:
+    print("okay")
+
+print("y=3")
+y=3
+print("if 4>y")
+if 4 > y:
+    print("okay")
+else:
+    print("wrong")
+print("if x==y")
+if x == y:
+    print("okay")
+else:
+    print("wrong")
+
+print("if x!=y")
+if x != y:
+    print("wrong")
+else:
+    print("okay")
+
+abc=123
+cba=321
+print("if abc!=cba")
+if abc != cba:
+    print("okay")
+else:
+    print("wrong")
+
+
+
+print("if abc==cba")
+if abc == cba:
+    print("wrong")
+else:
+    print("okay")

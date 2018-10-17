@@ -28,10 +28,10 @@ void createIfStatment(string firstVarname,
 	int intv;
 	char charv;
 	struct BoolStruct{
-		string* firstVarname;
+		const char* firstVarname;
 		int firstInt;
-		string* compare;
-		string* secondVarname;
+		const char* compare;
+		const char* secondVarname;
 		int secondInt;
 
 };
@@ -241,10 +241,10 @@ varassign:
 	} 
 ifstatment:
 	IFID boolexpr ':'   { 
-		string firstVarname=*$2.firstVarname;
+		string firstVarname=$2.firstVarname;
 		int firstInt=$2.firstInt;
-		string compare=*$2.compare;
-		string secondVarname =*$2.secondVarname;
+		string compare=$2.compare;
+		string secondVarname =$2.secondVarname;
 		int secondInt=$2.secondInt;
 		createIfStatment( firstVarname,
 		firstInt,
@@ -253,10 +253,10 @@ ifstatment:
 		secondInt);
 	} |
 	IFID '(' boolexpr ')' ':'   { 
-		string firstVarname=*$3.firstVarname;
+		string firstVarname=$3.firstVarname;
 		int firstInt=$3.firstInt;
-		string compare=*$3.compare;
-		string secondVarname =*$3.secondVarname;
+		string compare=$3.compare;
+		string secondVarname =$3.secondVarname;
 		int secondInt=$3.secondInt;
 		createIfStatment( firstVarname,
 		firstInt,
@@ -268,46 +268,37 @@ ifstatment:
 //will need to deal with int and variable comparison
 boolexpr:
 	INT BOOLSYMBOL INT {
-		string emp="";
 		$$.firstInt=$1;
-		$$.firstVarname=&emp;
-		string compSt=$2;
-		$$.compare=&compSt;
+		$$.firstVarname="";
+		$$.compare=$2;
 		$$.secondInt=$3;
-		$$.secondVarname=&emp;
+		$$.secondVarname="";
 		}
 		|
 		INT BOOLSYMBOL IDENT {
 		string emp="";
 		string identA=$3;
 		$$.firstInt=$1;
-		$$.firstVarname=&emp;
-		string compSt=$2;
-		$$.compare=&compSt;
+		$$.firstVarname="";
+		$$.compare=$2;
 		$$.secondInt=0;
-		$$.secondVarname=&identA;
+		$$.secondVarname=$3;
 		}
 		|
 		IDENT BOOLSYMBOL INT {
-		string emp="";
-		string identA=$1;
 		$$.firstInt=0;
-		$$.firstVarname=&identA;
-		string compSt=$2;
-		$$.compare=&compSt;
+		$$.firstVarname=$1;
+		$$.compare=$2;
 		$$.secondInt=$3;
-		$$.secondVarname=&emp;
+		$$.secondVarname="";
 		}
 		|
 		IDENT BOOLSYMBOL IDENT {
-		string identA=$1;
-		string identB=$3;
 		$$.firstInt=0;
-		$$.firstVarname=&identA;
-		string compSt=$2;
-		$$.compare=&compSt;
+		$$.firstVarname=$1;
+		$$.compare=$2;
 		$$.secondInt=0;
-		$$.secondVarname=&identB;
+		$$.secondVarname=$3;
 		}
 else:
 	ELSE {
