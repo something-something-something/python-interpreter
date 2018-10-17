@@ -464,6 +464,8 @@ ProgramTree* EvalMachine::getFunctionLocation(string name,ProgramTree* scope){
 			return functions[i].getLocation();
 		}
 	}
+	string exceptionreason="function "+name+" not defined";
+	throw exceptionreason;
 	return 0;
 }
 
