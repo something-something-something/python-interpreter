@@ -90,7 +90,7 @@ functiondef:
 		statmentList.push_back(func);
 	}
 
-//will be more complicted
+
 mathstatment:
 	math {
 		ProgramTree* mathy=new ProgramTree(currentIndent,mathSt);

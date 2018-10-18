@@ -3,7 +3,7 @@
 x = 34
 y = 17
 
-if x>34:
+if x>30:
 	d = x / y
 print("d=",d)
 

@@ -67,6 +67,7 @@ EvalMachine::EvalMachine(vector<Variable> v,vector<Function> f){
 	variables=v;
 	functions=f;
 }
+//runs program
 int EvalMachine::evaluate(ProgramTree *current){
 	switch(current->getType()){
 		case varAssignSt: {
@@ -79,6 +80,7 @@ int EvalMachine::evaluate(ProgramTree *current){
 		break;
 		}
 		case functionDecleration: {
+			//save function location
 			ProgramTree* location=current;
 			assignFunction(current->getStringValue(),location,current->getScope());
 		break;
@@ -98,9 +100,11 @@ int EvalMachine::evaluate(ProgramTree *current){
 						ifSt=current->getChild(i);
 					}
 				}
+				//run if statments
 				evaluate(ifSt);
 			}
 			else{
+				//runelse if false
 				ProgramTree* elSt;
 				bool elseExists=false;
 				for(int i=0;i<current->getChildren().size();i++){
@@ -150,7 +154,7 @@ int EvalMachine::evaluate(ProgramTree *current){
 		}
 		case mathSt:{
 			
-			//cout<< current->getStringValue()<<endl;
+			//sepperates math into ints variables functions and operators
 			vector<MathComponent> mathVec;
 			string mathStr=current->getStringValue();
 			string currStr="";
@@ -207,6 +211,7 @@ int EvalMachine::evaluate(ProgramTree *current){
 				}
 				
 			}
+			//handle uncatogrized compontnents
 			if(onIdentifier&&!onFunc){
 				mathVec.push_back({currStr,0,' ',false});
 				currStr="";
@@ -230,7 +235,7 @@ int EvalMachine::evaluate(ProgramTree *current){
 				onFunc=false;
 			}
 			//cout<<"postfix start"<<endl;
-
+			//put components in postfix order
 			stack <MathComponent> operators;
 			queue <MathComponent> output;
 			for(int i=0;i<mathVec.size();i++){
@@ -253,7 +258,7 @@ int EvalMachine::evaluate(ProgramTree *current){
 				operators.pop();
 			}
 			//cout<<"postfix output stack done Stack is size"<<output.size()<<endl;
-		
+			//evaluate statment
 			MathComponent a;
 			MathComponent b;
 			stack<MathComponent> answer;
@@ -380,7 +385,7 @@ int EvalMachine::evaluate(ProgramTree *current){
 		case functionStatments:{ 
 			for(int i=0;i<current->getChildren().size();i++){
 				if(current->getChild(i)->getType()==returnStatment){
-					
+					//return if return statment is found
 					return evaluate(current->getChild(i));
 				}
 				else{
@@ -464,6 +469,8 @@ ProgramTree* EvalMachine::getFunctionLocation(string name,ProgramTree* scope){
 			return functions[i].getLocation();
 		}
 	}
+	string exceptionreason="function "+name+" not defined";
+	throw exceptionreason;
 	return 0;
 }
 
