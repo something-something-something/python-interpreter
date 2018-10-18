@@ -15,6 +15,7 @@ vector<ProgramTree*> ProgramTree::getChildren(){
 }
 
 ProgramTree::ProgramTree(int i,ParseTreeType t){
+	//indentation of command
 	indent=i;
 	treeType=t;
 	intValue=0;
@@ -46,6 +47,7 @@ void ProgramTree::addChild(ProgramTree* c){
 void ProgramTree::setStringValue(string s){
 	stringValue=s;
 }
+//for debug
 void ProgramTree::print(){
 	string indentString="";
 	indentString.append(indent,' ');
@@ -104,6 +106,8 @@ ParseTreeType ProgramTree::getType(){
 int ProgramTree::getIndent(){
 	return indent;
 }
+//gets the scope of a program command
+//For telling which variable a function is refering to if the name is the same 
 ProgramTree* ProgramTree::getScope(){
 	/*ProgramTree* scope=this;
 	cout<<scope<<endl;
@@ -112,13 +116,16 @@ ProgramTree* ProgramTree::getScope(){
 		scope=parent;
 	}
 	return scope;*/
+	//scope of root elemnt is the root element
 	if(parent==NULL||this->getType()==program){
 		return this;
 	}
 	else if(parent->getType()==functionDecleration){
+		//children of functions have a scope of the function
 		return parent;
 	}
 	else{
+		//all other elements have the same scope as their parents
 		return parent->getScope();
 	}
 
